@@ -17,71 +17,74 @@ from pygame import mixer
 root = tk.ThemedTk()
 root.get_themes()
 root.set_theme("radiance")
+root.geometry("1000x800")
 
 statusbar = ttk.Label(root, text="Autrum", relief=SUNKEN, anchor=W, font='Times 10 italic')
 statusbar.pack(side=BOTTOM, fill=X)
-#cv = Canvas(root, height = 300, width = 300)
 
 frame1 = Frame(root); frame1.place(x=200, y=200, width=500, height=500)
 figure = plt.Figure(figsize=(5,5))
 canvas = FigureCanvasTkAgg(figure, frame1)
 canvas.get_tk_widget().place(x=0,y=0,width=500,height=500)
-ax = figure.add_subplot(111)
+ax = [figure.add_subplot(2, 1, 1), figure.add_subplot(2, 1, 2)]
 
 playlist = []
 
-wavFile = "file.wav"
+wavFile = ""
 chunk = 1024
-data, samplerate = sf.read(wavFile)
-n = len(data)  # the length of the arrays contained in data
-Fs = samplerate  # the sample rate
-ch1 = np.array([data[[i][0]] for i in range(n)])
-time_axis = np.linspace(0, n / Fs, n, endpoint=False)
-sound_axis = ch1 #we only focus on the first channel here
 
-def do_plot(x, y, i):
-    ax.clear()
-    ax.plot(x,y)
-    ax.axvline(x=i / Fs, color='r')
+
+def do_plot(x, y, i, Fs):
+    ax[0].clear()
+    ax[1].clear()
+    ax[0].plot(x,y)
+    ax[0].axvline(x=i / Fs, color='r')
     canvas.draw()
 
 
 
 def showing_audiotrack():
-    # We use a variable previousTime to store the time when a plot update is made
-    # and to then compute the time taken to update the plot of the audio data.
+    
     previousTime = time.time()
+    data, samplerate = sf.read(wavFile)
+    n = len(data)  
+    Fs = samplerate  
+    ch1 = np.array([data[[i][0]] for i in range(n)])
+    time_axis = np.linspace(0, n / Fs, n, endpoint=False)
+    sound_axis = ch1 
 
-    # Turning the interactive mode on
     plt.ion()
 
     spentTime = 0
+    updatePeriodicity = 1
 
-    # Let's the define the update periodicity
-    updatePeriodicity = 1  # expressed in seconds
+    i = 0
+    while i < n:
 
-    # Plotting the audio data and updating the plot
-    for i in range(n):
-        # Each time we read one second of audio data, we increase spentTime :
-        if i // Fs != (i-1) // Fs:
-            spentTime += 1
-        # We update the plot every updatePeriodicity seconds
-        
-        if spentTime == updatePeriodicity:
-            
-
-            do_plot(time_axis,sound_axis, i)
-            plt.pause(updatePeriodicity-(time.time()-previousTime))
-
+        if paused == True:
             previousTime = time.time()
-            spentTime = 0
+        
+        else:
+            if i // Fs != (i-1) // Fs:
+                spentTime += 1
+
+            if spentTime == updatePeriodicity:
+
+                do_plot(time_axis,sound_axis, i, Fs)
+                plt.pause(updatePeriodicity-(time.time()-previousTime))
+
+                previousTime = time.time()
+                spentTime = 0
+            i+=1
 
 def browse_file():
     global filename_path
+    global wavFile
     filename_path = filedialog.askopenfilename()
+    wavFile = os.path.basename(filename_path)
     add_to_playlist(filename_path)
 
-    mixer.music.queue(filename_path)
+    mixer.music.queue(wavFile)
 
 
 def add_to_playlist(filename):
@@ -91,7 +94,7 @@ def add_to_playlist(filename):
     playlist.insert(index, filename_path)
     index += 1
 
-mixer.init()  # initializing the mixer
+mixer.init()
 
 root.title("Melody")
 
@@ -126,7 +129,6 @@ def show_details(play_song):
     mins, secs = divmod(total_length, 60)
     mins = round(mins)
     secs = round(secs)
-    timeformat = '{:02d}:{:02d}'.format(mins, secs)
 
     t1 = threading.Thread(target=start_count, args=(total_length,))
     t1.start()
@@ -146,7 +148,6 @@ def start_count(t):
             mins, secs = divmod(current_time, 60)
             mins = round(mins)
             secs = round(secs)
-            timeformat = '{:02d}:{:02d}'.format(mins, secs)
             time.sleep(1)
             current_time += 1
 
@@ -162,13 +163,13 @@ def play_music():
         try:
             stop_music()
             time.sleep(1)
-            selected_song = playlistbox.curselection()
-            selected_song = int(selected_song[0])
-            play_it = playlist[selected_song]
-            mixer.music.load(play_it)
+            #selected_song = playlistbox.curselection()
+           # selected_song = int(selected_song[0])
+            #play_it = playlist[selected_song]
+            mixer.music.load(wavFile)
             mixer.music.play()
-            statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
-            show_details(play_it)
+            statusbar['text'] = "Playing music" + ' - ' + os.path.basename(wavFile)
+            show_details(wavFile)
         except:
             tkinter.messagebox.showerror('File not found', 'Melody could not find the file. Please check again.')
 
