@@ -41,8 +41,6 @@ def do_plot(x, y, i, Fs):
     ax[0].axvline(x=i / Fs, color='r')
     canvas.draw()
 
-
-
 def showing_audiotrack():
     
     previousTime = time.time()
@@ -82,21 +80,11 @@ def browse_file():
     global wavFile
     filename_path = filedialog.askopenfilename()
     wavFile = os.path.basename(filename_path)
-    add_to_playlist(filename_path)
-
     mixer.music.queue(wavFile)
-
-
-def add_to_playlist(filename):
-    filename = os.path.basename(filename)
-    index = 0
-    playlistbox.insert(index, filename)
-    playlist.insert(index, filename_path)
-    index += 1
 
 mixer.init()
 
-root.title("Melody")
+root.title("Autrum")
 
 leftframe = Frame(root)
 leftframe.pack(side=LEFT, padx=30, pady=30)
@@ -104,7 +92,7 @@ leftframe.pack(side=LEFT, padx=30, pady=30)
 playlistbox = Listbox(leftframe)
 playlistbox.pack()
 
-addBtn = ttk.Button(leftframe, text="+ Add", command=browse_file)
+addBtn = ttk.Button(leftframe, text="Cargar archivo", command=browse_file)
 addBtn.pack(side=LEFT)
 
 
@@ -125,7 +113,6 @@ def show_details(play_song):
         a = mixer.Sound(play_song)
         total_length = a.get_length()
 
-    # div - total_length/60, mod - total_length % 60
     mins, secs = divmod(total_length, 60)
     mins = round(mins)
     secs = round(secs)
@@ -163,9 +150,6 @@ def play_music():
         try:
             stop_music()
             time.sleep(1)
-            #selected_song = playlistbox.curselection()
-           # selected_song = int(selected_song[0])
-            #play_it = playlist[selected_song]
             mixer.music.load(wavFile)
             mixer.music.play()
             statusbar['text'] = "Playing music" + ' - ' + os.path.basename(wavFile)
