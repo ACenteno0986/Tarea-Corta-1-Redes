@@ -20,9 +20,11 @@ root.get_themes()
 root.set_theme("radiance")
 root.geometry("1000x800")
 
+#Componente de interfaz
 statusbar = ttk.Label(root, text="Autrum", relief=SUNKEN, anchor=W, font='Times 10 italic')
 statusbar.pack(side=BOTTOM, fill=X)
 
+#Interfaz
 frame1 = Frame(root); frame1.place(x=200, y=200, width=500, height=500)
 figure = plt.Figure(figsize=(5,5))
 canvas = FigureCanvasTkAgg(figure, frame1)
@@ -34,7 +36,7 @@ playlist = []
 wavFile = ""
 chunk = 1024
 
-
+# Grafico de frecuencias
 def do_plot(x, y, i, Fs):
     ax[0].clear()
     ax[1].clear()
@@ -75,6 +77,7 @@ def showing_audiotrack():
                 spentTime = 0
             i+=1
 
+# Comprime un archivo 
 def compressFiles(nameFile):
     file_zip = zipfile.ZipFile(nameFile+"/"+nameFile+".atm", 'w')
     for folder, subfolders, files in os.walk(nameFile):
@@ -84,6 +87,7 @@ def compressFiles(nameFile):
     file_zip.close()
 
 
+# Extrae los archivos del .atm 
 def extractFiles(filename_path):
     name = os.path.basename(filename_path).split(".");
     file_zip = zipfile.ZipFile(filename_path)
@@ -91,9 +95,8 @@ def extractFiles(filename_path):
     file_zip.close()
     return name[0]
 
-
+# Busca el archivo que se quiere reproducir
 def browse_file():
-    ##compressFiles(nameFile)
     global filename_path
     global wavFile
     filename_path = filedialog.askopenfilename()
@@ -108,9 +111,10 @@ def browse_file():
                 label.config(textvariable=text)
                 mixer.music.queue(wavFile)
     
-
+#Reproducción de audio
 mixer.init()
 
+# Componentes de la Interfaz 
 root.title("Autrum")
 
 leftframe = Frame(root)
@@ -129,7 +133,7 @@ rightframe.pack(pady=30)
 topframe = Frame(rightframe)
 topframe.pack()
 
-
+# Reproduce audio
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
 
@@ -149,11 +153,9 @@ def show_details(play_song):
     p2 = threading.Thread(target=showing_audiotrack, args=())
     p2.start()
 
-
-def start_count(t):
+# Inicia el programa
+def init(t):
     global paused
-    # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
-    # Continue - Ignores all of the statements below it. We check if music is paused or not.
     current_time = 0
     while current_time <= t and mixer.music.get_busy():
         if paused:
@@ -165,7 +167,7 @@ def start_count(t):
             time.sleep(1)
             current_time += 1
 
-
+# Repruduce el audio/graba 
 def play_music():
     global paused
 
@@ -185,6 +187,7 @@ def play_music():
             tkinter.messagebox.showerror('File not found', 'Melody could not find the file. Please check again.')
 
 
+# Detiene la reproducción del audio
 def stop_music():
     mixer.music.stop()
     statusbar['text'] = "Music Stopped"
@@ -192,14 +195,14 @@ def stop_music():
 
 paused = FALSE
 
-
+#Pausa el audio
 def pause_music():
     global paused
     paused = TRUE
     mixer.music.pause()
     statusbar['text'] = "Music Paused"
 
-
+# Componentes de interfaz
 middleframe = Frame(rightframe)
 middleframe.pack(pady=30, padx=30)
 
@@ -215,6 +218,7 @@ pauseBtn.grid(row=0, column=2, padx=10)
 bottomframe = Frame(rightframe)
 bottomframe.pack()
 
+# Se cierra el programa  
 def on_closing():
     stop_music()
     root.destroy()
