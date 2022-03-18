@@ -1,3 +1,5 @@
+from asyncio import streams
+from signal import pause
 import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,11 +7,14 @@ from pydub import AudioSegment
 from pydub.playback import play
 import time
 from multiprocessing import Process
+import pyaudio
+import wave
 
 # PREPARING THE AUDIO DATA
 
 # Audio file, .wav file
 wavFile = "file.wav"
+chunk = 1024
 
 # Retrieve the data from the wav file
 data, samplerate = sf.read(wavFile)
@@ -49,7 +54,7 @@ def showing_audiotrack():
     spentTime = 0
 
     # Let's the define the update periodicity
-    updatePeriodicity = 2  # expressed in seconds
+    updatePeriodicity = 1  # expressed in seconds
 
     # Plotting the audio data and updating the plot
     for i in range(n):
