@@ -12,7 +12,7 @@ from tkinter import *
 AudioName = "file.wav"
 CHUNK = 1024
 
-wf = wave.open("file.wav", 'rb')
+wf = wave.open("test/files/file.wav", 'rb')
 p = pyaudio.PyAudio()
 
 stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
