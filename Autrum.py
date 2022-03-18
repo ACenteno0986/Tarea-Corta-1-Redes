@@ -5,6 +5,7 @@ import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
 import tkinter.messagebox
+import zipfile
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
@@ -27,7 +28,7 @@ figure = plt.Figure(figsize=(5,5))
 canvas = FigureCanvasTkAgg(figure, frame1)
 canvas.get_tk_widget().place(x=0,y=0,width=500,height=500)
 ax = [figure.add_subplot(2, 1, 1), figure.add_subplot(2, 1, 2)]
-
+nameFile="download" ## Este se cambia cuando se quiere comprimir
 playlist = []
 
 wavFile = ""
@@ -42,7 +43,6 @@ def do_plot(x, y, i, Fs):
     canvas.draw()
 
 def showing_audiotrack():
-    
     previousTime = time.time()
     data, samplerate = sf.read(wavFile)
     n = len(data)  
@@ -75,12 +75,39 @@ def showing_audiotrack():
                 spentTime = 0
             i+=1
 
+def compressFiles(nameFile):
+    file_zip = zipfile.ZipFile(nameFile+"/"+nameFile+".atm", 'w')
+    for folder, subfolders, files in os.walk(nameFile):
+        for file in files:
+            if not file.endswith('.atm'):
+                file_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), nameFile), compress_type = zipfile.ZIP_DEFLATED)
+    file_zip.close()
+
+
+def extractFiles(filename_path):
+    name = os.path.basename(filename_path).split(".");
+    file_zip = zipfile.ZipFile(filename_path)
+    file_zip.extractall(name[0]+"/"+name[0]+"Data")
+    file_zip.close()
+    return name[0]
+
+
 def browse_file():
+    ##compressFiles(nameFile)
     global filename_path
     global wavFile
     filename_path = filedialog.askopenfilename()
-    wavFile = os.path.basename(filename_path)
-    mixer.music.queue(wavFile)
+    name = extractFiles(filename_path)
+    nameFolder=name+"/"+name+"Data";
+    for folder, subfolders, files in os.walk(nameFolder):
+        for file in files:
+            if file.endswith('.wav'):
+                wavFile = os.path.basename(file)
+                text = StringVar()
+                text.set(os.path.basename(filename_path))
+                label.config(textvariable=text)
+                mixer.music.queue(wavFile)
+    
 
 mixer.init()
 
@@ -89,8 +116,8 @@ root.title("Autrum")
 leftframe = Frame(root)
 leftframe.pack(side=LEFT, padx=30, pady=30)
 
-playlistbox = Listbox(leftframe)
-playlistbox.pack()
+label = Label(leftframe, text="Seleccione un archivo...")
+label.pack()
 
 addBtn = ttk.Button(leftframe, text="Cargar archivo", command=browse_file)
 addBtn.pack(side=LEFT)
