@@ -68,49 +68,44 @@ def do_plot2(x, y):
 
 # Procesa la información para los gráficos
 def mostrar_freq():
-    if(var.get == 1):
-        x = np.linspace(0, CHUNK, num=CHUNK, dtype=int)
-        y = np.zeros(CHUNK)
-        do_plot2(x,y)
 
-    else:
-        previousTime = time.time()
-        data, samplerate = sf.read(wavFile)
-        sound = data
-        sound = sound / 2.0**15
-        signal = sound[:]
+    previousTime = time.time()
+    data, samplerate = sf.read(wavFile)
+    sound = data
+    sound = sound / 2.0**15
+    signal = sound[:]
 
-        fft_spectrum = np.fft.rfft(signal)
-        freq = np.fft.rfftfreq(signal.size, d=1./samplerate)
-        fft_spectrum_abs = np.abs(fft_spectrum)
-        n = len(data)  
-        Fs = samplerate
-        time_axis = np.linspace(0, n / Fs, n, endpoint=False)
-        ax[1].plot(freq[:5000], fft_spectrum_abs[:5000])
+    fft_spectrum = np.fft.rfft(signal)
+    freq = np.fft.rfftfreq(signal.size, d=1./samplerate)
+    fft_spectrum_abs = np.abs(fft_spectrum)
+    n = len(data)  
+    Fs = samplerate
+    time_axis = np.linspace(0, n / Fs, n, endpoint=False)
+    ax[1].plot(freq[:5000], fft_spectrum_abs[:5000])
 
-        plt.ion()
-        AudiodataScaled = data/(2**15)
-        spentTime = 0
-        updatePeriodicity = 1
+    plt.ion()
+    AudiodataScaled = data/(2**15)
+    spentTime = 0
+    updatePeriodicity = 1
 
-        i = 0
-        while i < n:
+    i = 0
+    while i < n:
 
-            if paused == True:
-                previousTime = time.time()
+        if paused == True:
+            previousTime = time.time()
         
-            else:
-                if i // Fs != (i-1) // Fs:
-                    spentTime += 1
+        else:
+            if i // Fs != (i-1) // Fs:
+                spentTime += 1
 
-                if spentTime == updatePeriodicity:
+            if spentTime == updatePeriodicity:
 
-                    do_plot(time_axis,AudiodataScaled, i, Fs)
-                    plt.pause(updatePeriodicity-(time.time()-previousTime))
+                do_plot(time_axis,AudiodataScaled, i, Fs)
+                plt.pause(updatePeriodicity-(time.time()-previousTime))
 
-                    previousTime = time.time()
-                    spentTime = 0
-                i+=1
+                previousTime = time.time()
+                spentTime = 0
+            i+=1
 
 # Comprime un archivo 
 def compressFiles(nameFile):
@@ -182,7 +177,7 @@ def show_details(play_song):
     mins = round(mins)
     secs = round(secs)
 
-    t1 = threading.Thread(target=start_count, args=(total_length,))
+    t1 = threading.Thread(target=init, args=(total_length,))
     t1.start()
     p2 = threading.Thread(target=mostrar_freq, args=())
     p2.start()
@@ -222,7 +217,6 @@ def reproducir():
                 tkinter.messagebox.showerror('Error al abrir o cargar el archivo')
 
     if(var.get() == 1):
-        print("Prua de que entra a grabar")
         p3 = threading.Thread(target=grabar, args=())
         p3.start()       
 
